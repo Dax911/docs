@@ -4,6 +4,7 @@ description: Learn how to use Astro DB, a fully-managed SQL database designed ex
 githubIntegrationURL: 'https://github.com/withastro/astro/tree/main/packages/db/'
 i18nReady: true
 ---
+
 import { FileTree } from '@astrojs/starlight/components';
 import PackageManagerTabs from '~/components/tabs/PackageManagerTabs.astro';
 import ReadMore from '~/components/ReadMore.astro';
@@ -31,6 +32,11 @@ Add Astro DB to a new or existing Astro project (requires `astro@4.5` or later) 
   yarn astro add db
   ```
   </Fragment>
+  <Fragment slot="bun">
+  ```sh
+  bunx astro add db
+  ```
+  </Fragment>
 </PackageManagerTabs>
 
 If you prefer, you can [install `@astrojs/db` manually](/en/guides/integrations-guide/db/#manual-installation) instead.
@@ -45,8 +51,8 @@ Installing `@astrojs/db` with the `astro add` command will create a `db/config.t
 import { defineDb } from 'astro:db';
 
 export default defineDb({
-  tables: { },
-})
+  tables: {},
+});
 ```
 
 ### Columns
@@ -68,7 +74,7 @@ const Comment = defineTable({
     published: column.date(),
     // An untyped JSON object.
     metadata: column.json(),
-  }
+  },
 });
 ```
 
@@ -87,12 +93,12 @@ const Comment = defineTable({
   columns: {
     author: column.text(),
     body: column.text(),
-  }
-})
+  },
+});
 
 export default defineDb({
   tables: { Comment },
-})
+});
 ```
 
 <ReadMore>See the [table configuration reference](/en/guides/integrations-guide/db/#table-configuration-reference) for a complete reference of table options.</ReadMore>
@@ -113,14 +119,14 @@ const Author = defineTable({
   columns: {
     id: column.number({ primaryKey: true }),
     name: column.text(),
-  }
+  },
 });
 
 const Comment = defineTable({
   columns: {
     authorId: column.number({ references: () => Author.columns.id }),
     content: column.text(),
-  }
+  },
 });
 ```
 
@@ -135,11 +141,11 @@ The following example defines two rows of development data for a `Comment` table
 ```ts title="db/seed.ts"
 import { db, Comment } from 'astro:db';
 
-export default async function() {
+export default async function () {
   await db.insert(Comment).values([
     { authorId: 1, body: 'Hope you like Astro DB!' },
-    { authorId: 2, body: 'Enjoy!'},
-  ])
+    { authorId: 2, body: 'Enjoy!' },
+  ]);
 }
 ```
 
@@ -157,8 +163,7 @@ import { db } from 'astro:db';
 
 Astro DB includes a built-in [Drizzle ORM](https://orm.drizzle.team/) client. There is no setup or manual configuration required to use the client. The Astro DB `db` client is automatically configured to talk to your database (local or remote) when you run Astro. It uses your exact database schema definition for type-safe SQL queries with TypeScript errors when you reference a column or table that doesn't exist.
 
-
-### Select 
+### Select
 
 The following example selects all rows of a `Comment` table. This returns the complete array of seeded development data from `db/seed.ts` which is then available for use in your page template:
 
@@ -226,13 +231,13 @@ You can also query your database from an API endpoint. This example deletes a ro
 
 ```ts
 // src/pages/api/comments/[id].ts
-import type { APIRoute } from "astro";
+import type { APIRoute } from 'astro';
 import { db, Comment } from 'astro:db';
 
 export const DELETE: APIRoute = async (ctx) => {
   await db.delete(Comment).where({ id: ctx.params.id });
   return new Response(null, { status: 204 });
-}
+};
 ```
 
 <ReadMore>
@@ -243,10 +248,9 @@ See the [Drizzle `insert()` API reference](https://orm.drizzle.team/docs/insert)
 
 ### Filtering
 
-To query for table results by a specific property, use [Drizzle options for partial selects](https://orm.drizzle.team/docs/select#partial-select). For example, add [a `.where()` call](https://orm.drizzle.team/docs/select#filtering) to your `select()` query and pass the comparison you want to make. 
+To query for table results by a specific property, use [Drizzle options for partial selects](https://orm.drizzle.team/docs/select#partial-select). For example, add [a `.where()` call](https://orm.drizzle.team/docs/select#filtering) to your `select()` query and pass the comparison you want to make.
 
 The following example queries for all rows in a `Comment` table that contain the phrase "Astro DB." Use [the `like()` operator](https://orm.drizzle.team/docs/operators#like) to check if a phrase is present within the `body`:
-
 
 ```astro title="src/pages/index.astro"
 ---
@@ -337,15 +341,15 @@ See the [Drizzle `db.batch()`](https://orm.drizzle.team/docs/batch-api) docs for
 Astro DB can [connect to the Astro Studio platform](/en/recipes/studio/) to quickly add a hosted database to your project. You can view, manage and deploy new hosted databases all from the Astro Studio web portal.
 
 There are two ways to create a project in Astro Studio:
+
 1. via the [Astro Studio CLI](/en/reference/cli-reference/#astro-studio-cli) using `astro link`
-2. via the [Astro Studio web UI](https://studio.astro.build) 
+2. via the [Astro Studio web UI](https://studio.astro.build)
 
 To create a new database in the Astro Studio web UI, click the "create project" button in the header and follow the instructions presented. Astro Studio will walk you through the necessary steps, and at the end of the process you'll have a hosted database configured for your project.
 
 <StudioHeading>
 ### Pushing table schemas
 </StudioHeading>
-
 
 Your table schema will change overtime as your project grows. You can safely test configuration changes locally and push to your Studio database when you deploy.
 
@@ -374,7 +378,7 @@ You can also push schema changes via the CLI using the `astro db push` command:
 This command will verify changes can be made without data loss and guide on recommended schema changes to resolve conflicts. If a breaking schema change _must_ be made, add the `--force-reset` flag to reset all production data.
 
 <StudioHeading>
-### Pushing data 
+### Pushing data
 </StudioHeading>
 
 You may need to push data to your Studio database for seeding or data migrations. You can author a `.ts` file with the `astro:db` module to write type-safe queries. Then, execute the file against your Studio database using the command `astro db execute <file-path> --remote`:
@@ -389,7 +393,7 @@ export default async function () {
   await db.insert(Comment).values([
     { authorId: 1, body: 'Hope you like Astro DB!' },
     { authorId: 2, body: 'Enjoy!' },
-  ])
+  ]);
 }
 ```
 
@@ -487,7 +491,7 @@ import { asDrizzleTable } from '@astrojs/db/utils';
 import { db } from 'astro:db';
 import { Pets } from './config';
 
-export default async function() {
+export default async function () {
   const typeSafePets = asDrizzleTable('Pets', Pets);
 
   await db.insert(typeSafePets).values([
